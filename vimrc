@@ -1,9 +1,10 @@
-syntax on
-"Use new regular expression engine
 
+set timeoutlen=1000
+set ttimeoutlen=0
+
+"Use new regular expression engine
 set re=0
-set nocompatible              " be iMproved, required
-filetype off                  " required
+
 
 call plug#begin()
 
@@ -17,7 +18,9 @@ Plug 'neoclide/coc.nvim', {'branch': 'release'}
 " HTML, CSS, JS 
 Plug 'tpope/vim-surround'
 
-
+" VimWiki
+Plug 'vimwiki/vimwiki', {'on': []}
+command! VimWiki call plug#load('vimwiki')
 
 
 call plug#end()
@@ -62,25 +65,12 @@ set nospell
 set foldenable
 set foldlevelstart=10
 
-" TAB AND SPLIT"
-
-nnoremap <Tab> gt
-nnoremap <S-Tab> gT
-
-
-
-" Netrw "
-let g:netrw_winsize=50
-
-" Resize windows size "
-:command -nargs=+ Vresize vertical resize <args>
-:command -nargs=+ Hresize
 
 " Coc highlights
 
 highlight CocErrorFloat ctermfg=white 
 
-"-------------------------------------------------------------------------------- "
+"--------------------------------------------------------------------------------"
 " Vim config
 nnoremap ü <C-]>
 nnoremap Ü <C-O>
@@ -93,14 +83,34 @@ nnoremap <Leader>e :e!<CR>
 set background=dark
 set tags=./tags;/
 
-" turn hybrid line numbers on
-:set number relativenumber
-:set nu rnu
 
 " Autocmd
-autocmd FileType python let b:coc_root_patterns = ['.git', '.venv', '.env']
-autocmd FileType python  nnoremap <buffer><silent><Leader>r :w!<CR>:!clear;python3 %<CR>
+augroup COCPython
+	autocmd!
+	autocmd FileType python let b:coc_root_patterns = ['.git', '.venv', '.env']
+	autocmd FileType python  nnoremap <buffer><silent><Leader>r :w!<CR>:!clear;python3 %<CR>
+augroup END
 
+" Turn hybrid line numbers on
+augroup numbertoggle
+  autocmd!
+  autocmd BufEnter,FocusGained,InsertLeave,WinEnter * if &nu && mode() != "i" | set rnu   | endif
+  autocmd BufLeave,FocusLost,InsertEnter,WinLeave   * if &nu                  | set nornu | endif
+augroup END
+
+" Tmux pane naming 
+augroup Tmux
+	autocmd!
+	autocmd BufEnter * call system("tmux rename-window " . expand("%:t"))
+	autocmd VimLeave * call system("tmux rename-window zsh")
+	autocmd BufEnter * let &titlestring = ' ' . expand("%:t")
+augroup END
+set title
+
+" Command
+command CreatePDF hardcopy > %.ps | !ps2pdf %.ps && rm %.ps
+
+"--------------------------------------------------------------------------------"
 
 " Cursor
 " Remove underline color of number by
@@ -117,9 +127,6 @@ let &t_SI.="\e[5 q" "SI = INSERT mode
 let &t_SR.="\e[4 q" "SR = REPLACE mode
 let &t_EI.="\e[2 q" "EI = NORMAL mode (ELSE)
 
-set ttimeout
-set ttimeoutlen=1
-set ttyfast
 autocmd VimEnter * stopinsert
 
 "Cursor settings:
@@ -157,12 +164,6 @@ autocmd VimEnter * stopinsert
  vnoremap <Up> <Nop>
 
 
-autocmd BufEnter * call system("tmux rename-window " . expand("%:t"))
-autocmd VimLeave * call system("tmux rename-window zsh")
-autocmd BufEnter * let &titlestring = ' ' . expand("%:t")
-set title
-
-
 " Statusline
 let gitBranch=system("git rev-parse --abbrev-ref HEAD")
 set laststatus=2
@@ -186,7 +187,15 @@ if version >= 700
   au InsertLeave * hi StatusLine term=reverse ctermfg=0 ctermbg=2 gui=bold,reverse
 endif
 
-set timeoutlen=1000
-set ttimeoutlen=0
 
-command CreatePDF hardcopy > %.ps | !ps2pdf %.ps && rm %.ps
+
+" VimWiki
+let wiki_1 = {}
+let wiki_1.path = '~/vimwiki/'
+let wiki_1.path_html = '~/vimwiki_html/'
+
+let wiki_2 = {}
+let wiki_2.path = '~/private/'
+let wiki_2.path_html = '~/private_html/'
+
+let g:vimwiki_list = [wiki_1, wiki_2]
