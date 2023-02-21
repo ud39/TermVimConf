@@ -1,2 +1,2 @@
 # TermVimConf
-Repo for configuration file of vim and terminal
+Repo for configuration files of vim, brew packages and terminal
