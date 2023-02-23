@@ -1,4 +1,3 @@
-
 set timeoutlen=1000
 set ttimeoutlen=0
 
@@ -17,6 +16,10 @@ Plug 'neoclide/coc.nvim', {'branch': 'release'}
 
 " HTML, CSS, JS 
 Plug 'tpope/vim-surround'
+
+" Pretty up 
+Plug 'maxmellon/vim-jsx-pretty'
+
 
 " VimWiki
 Plug 'vimwiki/vimwiki', {'on': []}
@@ -39,6 +42,7 @@ inoremap <silent><expr> <Tab>
 
 inoremap <expr> <Tab> coc#pum#visible() ? coc#pum#next(1) : "\<Tab>"
 inoremap <expr> <S-Tab> coc#pum#visible() ? coc#pum#prev(1) : "\<S-Tab>"
+inoremap <expr> <CR> coc#pum#visible() ? coc#_select_confirm() : "<CR>"
 
 " Config FZF
 nmap <C-P> :Files <CR>
@@ -49,12 +53,12 @@ au BufNewFile,BufRead *.py
     \ set tabstop=4
     \ | set softtabstop=4
     \ | set shiftwidth=4
-    \ | set textwidth=79
+    \ | set textwidth=120
     \ | set fileformat=unix
 
 
 "Format: JS HTML CSS, TS, C
-au BufNewFile,BufRead *.ts,*.js,*.html,*.css,*.c
+au BufNewFile,BufRead *.ts,*.js,*.html,*.css,*.c,*.jsx, *.tsx
     \ set tabstop=2
     \ | set softtabstop=2
     \ | set shiftwidth=2
@@ -68,14 +72,11 @@ set foldlevelstart=10
 
 
 " Coc highlights
-
+highlight CocMenuSel ctermbg=white
 highlight CocErrorFloat ctermfg=white 
 
 "--------------------------------------------------------------------------------"
 " Vim config
-nnoremap ü <C-]>
-nnoremap Ü <C-O>
-nnoremap ä `
 imap <C-c> <Esc>
 
 let mapleader = " "
@@ -110,12 +111,13 @@ set title
 
 " Command
 command CreatePDF hardcopy > %.ps | !ps2pdf %.ps && rm %.ps
+	command SaveFileWithToday exe 'w %-'.strftime("%F")
 
 "--------------------------------------------------------------------------------"
 
 " Cursor
 " Remove underline color of number by
-:hi LineNr term=bold cterm=None ctermfg=DarkGrey ctermbg=None gui=None guifg=DarkGrey guibg=None
+:hi LineNr term=bold cterm=NONE ctermfg=DarkGrey ctermbg=NONE gui=NONE guifg=DarkGrey guibg=NONE
 :hi CursorLineNr cterm=bold term=bold ctermfg=yellow gui=bold
 
 :hi CursorLine   cterm=NONE ctermbg=darkred ctermfg=white guibg=darkred guifg=white
@@ -123,10 +125,12 @@ command CreatePDF hardcopy > %.ps | !ps2pdf %.ps && rm %.ps
 :nnoremap <silent><Leader>c :set cursorline! cursorcolumn!<CR>
 
 "Mode Settings
-
-let &t_SI.="\e[5 q" "SI = INSERT mode
-let &t_SR.="\e[4 q" "SR = REPLACE mode
-let &t_EI.="\e[2 q" "EI = NORMAL mode (ELSE)
+"SI = INSERT mode
+let &t_SI.="\e[5 q" 
+"SR = REPLACE mode
+let &t_SR.="\e[4 q"
+"EI = NORMAL mode (ELSE)
+let &t_EI.="\e[2 q" 
 
 autocmd VimEnter * stopinsert
 
@@ -200,3 +204,12 @@ let wiki_2.path = '~/private/'
 let wiki_2.path_html = '~/private_html/'
 
 let g:vimwiki_list = [wiki_1, wiki_2]
+
+let g:netrw_bufsettings = 'noma nomod nu nobl nowrap ro'
+
+
+" Bell 
+set eb 
+
+
+
