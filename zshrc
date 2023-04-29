@@ -1,3 +1,10 @@
+# Enable Powerlevel10k instant prompt. Should stay close to the top of ~/.zshrc.
+# Initialization code that may require console input (password prompts, [y/n]
+# confirmations, etc.) must go above this block; everything else may go below.
+if [[ -r "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh" ]]; then
+  source "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh"
+fi
+
 # If you come from bash you might have to change your $PATH.
 # export PATH=$HOME/bin:/usr/local/bin:$PATH
 export PATH="/usr/local/opt/python@3.7/libexec/bin:$PATH"
@@ -8,7 +15,10 @@ export ZSH="/Users/jutiboottawong/.oh-my-zsh"
 # load a random theme each time oh-my-zsh is loaded, in which case,
 # to know which specific one was loaded, run: echo $RANDOM_THEME
 # See https://github.com/ohmyzsh/ohmyzsh/wiki/Themes
-ZSH_THEME="robbyrussell"
+ZSH_THEME="powerlevel10k/powerlevel10k"
+#robbyrussell
+#gnzh
+#powerlevel10k/powerlevel10k
 
 # Set list of themes to pick from when loading at random
 # Setting this variable when ZSH_THEME=random will cause zsh to load
@@ -70,7 +80,7 @@ ZSH_THEME="robbyrussell"
 # Custom plugins may be added to $ZSH_CUSTOM/plugins/
 # Example format: plugins=(rails git textmate ruby lighthouse)
 # Add wisely, as too many plugins slow down shell startup.
-plugins=(vi-mode git)
+plugins=(vi-mode git zsh-autosuggestions)
 
 
 # User configuration
@@ -104,10 +114,18 @@ plugins=(vi-mode git)
 
 set showmatch;
 alias v="fzf --preview 'bat --color \"always\" {}'"
-alias preview='vim $(v)'
-alias cdf='cd $(find . -type d -print | fzf)'
-alias cdfh='cd $(find ~/ -type d -print | fzf)'
-
+alias pview='nvim $(v)'
+function cdf() {
+    local depth=${1:-1}   # Set default depth to 1 if not specified
+    if (( depth >= 0 )); then  # Check if depth is non-negative
+        local dir=$(find . -maxdepth $depth -type d -print | fzf)
+    else  # If depth is negative, go up the directory tree
+	local dir=$(cd .. && cd "$(printf '%0.s../' $(seq 1 $((depth * -1 - 1))))" && pwd)
+    fi
+    if [ -n "$dir" ]; then  # Check if a directory was selected
+        cd "$dir"
+    fi
+}
 
 [ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
 source $ZSH/oh-my-zsh.sh
@@ -136,6 +154,9 @@ alias actV='. venv/bin/activate'
 
 
 # Tmux 
+function tattach() {
+ tmux attach -t "$1"
+}
 
 
 # Ctags
@@ -175,6 +196,51 @@ preexec() { echo -ne '\e[2 q' ;} # Use beam shape cursor for each new prompt.
 
 
 # Edit line in vim with ctrl-e:
-autoload edit-command-line; zle -N edit-command-line
-bindkey '^e' edit-command-line
+#autoload edit-command-line; zle -N edit-command-line
+#bindkey '^e' edit-command-line
 
+
+# Postgres
+export PGDATABASE=postgres
+export PATH=/usr/local/opt/postgresql@15/bin:$PATH
+
+
+
+# Tree
+function tree() {
+    local depth=${1:-2}
+    if (( depth >= 0 )); then
+        find . -maxdepth "$depth" -print | sed -e "s;[^/]*/;|____;g;s;____|; |;g" | less -r
+    else
+        depth=$((depth * -1))
+        cd "$(printf '%0.s../' $(seq 1 $depth))"
+        mytree
+    fi
+}
+alias ls='colorls'
+
+
+function change() {
+    current_tty=$(tty)
+    thumbnails='/Users/jutiboottawong/Documents/background_img_term'
+    images=(`ls $thumbnails`)
+    num_images=${#images[*]}
+    myfilename="${thumbnails}/`echo ${images[$((RANDOM%$num_images + 1))]}`"
+    base64filename=$(echo -n "${myfilename}" | base64)
+    echo $myfilename > $current_tty
+    printf "\033]1337;SetBackgroundImageFile=%s;tile\a" "$base64filename" > "$current_tty"
+    unset $RANDOM
+}
+
+#Django database migration
+alias dj_database='python manage.py makemigrations && python manage.py migrate;'
+alias dj_runserver='python manage.py runserver'
+
+alias vim='nvim'
+
+# To customize prompt, run `p10k configure` or edit ~/.p10k.zsh.
+[[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
+
+
+
+[ -f "/Users/jutiboottawong/.ghcup/env" ] && source "/Users/jutiboottawong/.ghcup/env" # ghcup-env
