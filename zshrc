@@ -113,19 +113,41 @@ plugins=(vi-mode git zsh-autosuggestions)
 
 
 set showmatch;
-alias v="fzf --preview 'bat --color \"always\" {}'"
-alias pview='nvim $(v)'
+
+#alias v="fzf --preview 'bat --color \"always\" {}'"
+#alias pview='nvim $(v)'
+
+function pview() {
+  local files
+  files=$(fzf --preview "bat --color=\"always\" {}")
+  if [ -n "$files" ] && [ -f "$files" ]; then
+    nvim "$files"
+  fi
+}
+
+
 function cdf() {
-    local depth=${1:-1}   # Set default depth to 1 if not specified
-    if (( depth >= 0 )); then  # Check if depth is non-negative
-        local dir=$(find . -maxdepth $depth -type d -print | fzf)
-    else  # If depth is negative, go up the directory tree
-	local dir=$(cd .. && cd "$(printf '%0.s../' $(seq 1 $((depth * -1 - 1))))" && pwd)
+    local depth=${1:-1}  # Set default depth to 1 if not specified
+    local include_hidden=${2:-0}  # Set default include_hidden to 0 (exclude hidden files) if not specified
+    if (( include_hidden == 1 )); then
+        if (( depth >= 0 )); then  # Check if depth is non-negative
+            local dir=$(find . -maxdepth $depth -type d -print | fzf)
+        else  # If depth is negative, go up the directory tree
+            local dir=$(cd .. && cd "$(printf '%0.s../' $(seq 1 $((depth * -1 - 1))))" && pwd)
+        fi
+    else
+        if (( depth >= 0 )); then  # Check if depth is non-negative
+            local dir=$(find . -maxdepth $depth -type d -not -path '*/\.*' -print | fzf)
+        else  # If depth is negative, go up the directory tree
+            local dir=$(cd .. && cd "$(printf '%0.s../' $(seq 1 $((depth * -1 - 1))))" && pwd)
+        fi
     fi
     if [ -n "$dir" ]; then  # Check if a directory was selected
         cd "$dir"
     fi
 }
+
+
 
 [ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
 source $ZSH/oh-my-zsh.sh
@@ -217,7 +239,10 @@ function tree() {
         mytree
     fi
 }
+# Misc. Alias
+alias gitgraph='git log --graph --oneline --decorate --all'
 alias ls='colorls'
+alias vim='nvim'
 
 
 function change() {
@@ -236,11 +261,16 @@ function change() {
 alias dj_database='python manage.py makemigrations && python manage.py migrate;'
 alias dj_runserver='python manage.py runserver'
 
-alias vim='nvim'
 
 # To customize prompt, run `p10k configure` or edit ~/.p10k.zsh.
 [[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
 
 
 
+#[ -f "/Users/jutiboottawong/.ghcup/env" ] && source "/Users/jutiboottawong/.ghcup/env" # ghcup-env
+
+
+export GIT_EDITOR=nvim
+
+#[ -f "/Users/jutiboottawong/.ghcup/env" ] && source "/Users/jutiboottawong/.ghcup/env" # ghcup-env
 [ -f "/Users/jutiboottawong/.ghcup/env" ] && source "/Users/jutiboottawong/.ghcup/env" # ghcup-env
