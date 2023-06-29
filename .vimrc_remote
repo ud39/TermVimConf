@@ -1,0 +1,120 @@
+set timeoutlen=1000
+set ttimeoutlen=0
+
+colorscheme evening
+
+"Use new regular expression engine
+set re=0
+
+"Format: Python vim PEP8
+au BufNewFile,BufRead *.py
+    \ set tabstop=4
+    \ | set softtabstop=4
+    \ | set shiftwidth=4
+    \ | set textwidth=120
+    \ | set fileformat=unix
+
+
+"Format: JS HTML CSS, TS, C
+au BufNewFile,BufRead *.ts,*.js,*.html,*.css,*.c,*.jsx, *.tsx
+    \ set tabstop=2
+    \ | set softtabstop=2
+    \ | set shiftwidth=2
+
+set number
+set encoding=utf-8
+set spelllang=en_us
+set nospell
+set foldenable
+set foldlevelstart=10
+
+
+"--------------------------------------------------------------------------------"
+" Vim config
+imap <C-c> <Esc>
+
+let mapleader = " "
+nnoremap <Leader>e :e!<CR>
+
+set background=dark
+set tags=./tags;/
+
+
+" Turn hybrid line numbers on
+augroup numbertoggle
+  autocmd!
+  autocmd BufEnter,FocusGained,InsertLeave,WinEnter * if &nu && mode() != "i" | set rnu   | endif
+  autocmd BufLeave,FocusLost,InsertEnter,WinLeave   * if &nu                  | set nornu | endif
+augroup END
+
+" Tmux pane naming
+augroup Tmux
+        autocmd!
+        autocmd BufEnter * call system("tmux rename-window " . expand("%:t"))
+        autocmd VimLeave * call system("tmux rename-window zsh")
+        autocmd BufEnter * let &titlestring = ' ' . expand("%:t")
+augroup END
+set title
+
+" Command
+command CreatePDF hardcopy > %.ps | !ps2pdf %.ps && rm %.ps
+        command SaveFileWithToday exe 'w %-'.strftime("%F")
+
+"--------------------------------------------------------------------------------"
+
+" Cursor
+" Remove underline color of number by
+:hi LineNr term=bold cterm=NONE ctermfg=DarkGrey ctermbg=NONE gui=NONE guifg=DarkGrey guibg=NONE
+:hi CursorLineNr cterm=bold term=bold ctermfg=yellow gui=bold
+
+:hi CursorLine   cterm=NONE ctermbg=darkred ctermfg=white guibg=darkred guifg=white
+:hi CursorColumn cterm=NONE ctermbg=darkred ctermfg=white guibg=darkred guifg=white
+:nnoremap <silent><Leader>c :set cursorline! cursorcolumn!<CR>
+
+highlight CursorLine cterm=NONE ctermbg=NONE ctermfg=NONE guibg=NONE guifg=NONE
+set cursorline
+
+"Mode Settings
+"SI = INSERT mode
+let &t_SI.="\e[5 q"
+"SR = REPLACE mode
+let &t_SR.="\e[4 q"
+"EI = NORMAL mode (ELSE)
+let &t_EI.="\e[2 q"
+
+
+autocmd VimEnter * stopinsert
+
+"Cursor settings:
+
+"  1 -> blinking block
+"  2 -> solid block
+"  3 -> blinking underscore
+"  4 -> solid underscore
+"  5 -> blinking vertical bar
+"  6 -> solid vertical bar
+
+" HardMode disable arrow keys
+" Remove newbie crutches in Command Mode
+ cnoremap <Down> <Nop>
+ cnoremap <Left> <Nop>
+ cnoremap <Right> <Nop>
+ cnoremap <Up> <Nop>
+
+" Remove newbie crutches in Insert Mode
+ inoremap <Down> <Nop>
+ inoremap <Left> <Nop>
+ inoremap <Right> <Nop>
+ inoremap <Up> <Nop>
+
+" Remove newbie crutches in Normal Mode
+ nnoremap <Down> <Nop>
+ nnoremap <Left> <Nop>
+ nnoremap <Right> <Nop>
+ nnoremap <Up> <Nop>
+
+" Remove newbie crutches in Visual Mode
+ vnoremap <Down> <Nop>
+ vnoremap <Left> <Nop>
+ vnoremap <Right> <Nop>
+ vnoremap <Up> <Nop>
