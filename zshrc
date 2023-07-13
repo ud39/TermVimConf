@@ -147,6 +147,12 @@ function cdf() {
     fi
 }
 
+function cdftmux() {
+    if cdf "$1"; then
+        tmux
+    fi
+}
+
 
 
 [ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
@@ -269,8 +275,14 @@ alias dj_runserver='python manage.py runserver'
 
 #[ -f "/Users/jutiboottawong/.ghcup/env" ] && source "/Users/jutiboottawong/.ghcup/env" # ghcup-env
 
-
+# GIT
 export GIT_EDITOR=nvim
+export GITDELTA_COLOR_FILE="\033[33m"  # Yellow color for file names
+
+alias gitd='git diff'
+alias gits='git status'
+alias gitst='git stash save' 
+alias gitstp='git pop'
 
 #[ -f "/Users/jutiboottawong/.ghcup/env" ] && source "/Users/jutiboottawong/.ghcup/env" # ghcup-env
 [ -f "/Users/jutiboottawong/.ghcup/env" ] && source "/Users/jutiboottawong/.ghcup/env" # ghcup-env
