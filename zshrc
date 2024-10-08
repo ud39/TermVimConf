@@ -4,13 +4,11 @@
 if [[ -r "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh" ]]; then
   source "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh"
 fi
-
 # If you come from bash you might have to change your $PATH.
 # export PATH=$HOME/bin:/usr/local/bin:$PATH
 export PATH="/usr/local/opt/python@3.7/libexec/bin:$PATH"
 # Path to your oh-my-zsh installation.
 export ZSH="/Users/jutiboottawong/.oh-my-zsh"
-
 # Set name of the theme to load --- if set to "random", it will
 # load a random theme each time oh-my-zsh is loaded, in which case,
 # to know which specific one was loaded, run: echo $RANDOM_THEME
@@ -117,7 +115,8 @@ set showmatch;
 #alias v="fzf --preview 'bat --color \"always\" {}'"
 #alias pview='nvim $(v)'
 
-function pview() {
+# Functions
+function pv() {
   local files
   files=$(fzf --preview "bat --color=\"always\" {}")
   if [ -n "$files" ] && [ -f "$files" ]; then
@@ -125,6 +124,14 @@ function pview() {
   fi
 }
 
+
+function pva() {
+  local files
+  files=$(find . -type f -name '.*' | fzf --preview "bat --color=\"always\" {}")
+  if [ -n "$files" ] && [ -f "$files" ]; then
+    nvim "$files"
+  fi
+}
 
 function cdf() {
     local depth=${1:-1}  # Set default depth to 1 if not specified
@@ -213,6 +220,7 @@ function zle-keymap-select {
     echo -ne '\e[5 q'
   fi
 }
+
 zle -N zle-keymap-select
 zle-line-init() {
     zle -K viins # initiate `vi insert` as keymap (can be removed if `bindkey -V` has been set elsewhere)
@@ -236,20 +244,56 @@ export PATH=/usr/local/opt/postgresql@15/bin:$PATH
 
 # Tree
 function tree() {
-    local depth=${1:-2}
+    local filetype=${1:-}
+    local depth=${2:-2}
+
     if (( depth >= 0 )); then
-        find . -maxdepth "$depth" -print | sed -e "s;[^/]*/;|____;g;s;____|; |;g" | less -r
+        if [[ -z "$filetype" ]]; then
+            find . -maxdepth "$depth" -print | sed -e "s;[^/]*/;|____;g;s;____|; |;g" | less -r
+        else
+            find . -maxdepth "$depth" -type f -name "*.$filetype" -print | sed -e "s;[^/]*/;|____;g;s;____|; |;g" | less -r
+        fi
     else
         depth=$((depth * -1))
         cd "$(printf '%0.s../' $(seq 1 $depth))"
         mytree
     fi
 }
+
+
+
 # Misc. Alias
 alias gitgraph='git log --graph --oneline --decorate --all'
 alias ls='colorls'
 alias vim='nvim'
 
+function nap() {
+    local hours=$1
+
+    local seconds=$((hours * 3600))
+
+    if [[ -z "$hours" || "$hours" -eq 0 ]]; then
+        sudo pmset sleepnow
+    else
+        nohup bash -c "sleep $seconds && sudo pmset sleepnow" &>/dev/null &
+        echo $! > /tmp/nap_pid
+        echo "Nap in $hours hour(s). Cancel via undo_nap function."
+    fi
+}
+
+function undo_nap() {
+    if [[ -f /tmp/nap_pid ]]; then
+        kill $(cat /tmp/nap_pid) 2>/dev/null
+        if [[ $? -eq 0 ]]; then
+            echo "Time to live"
+        else
+            echo "Failed canceling nap"
+        fi
+        rm /tmp/nap_pid
+    else
+        echo "No naps were planned"
+    fi
+}
 
 function change() {
     current_tty=$(tty)
@@ -277,6 +321,7 @@ alias dj_runserver='python manage.py runserver'
 
 # GIT
 export GIT_EDITOR=nvim
+export EDITOR=nvim
 export GITDELTA_COLOR_FILE="\033[33m"  # Yellow color for file names
 
 alias gitd='git diff'
